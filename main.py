@@ -24,14 +24,23 @@ def ai_move():
 @app.route('/reset', methods=['POST'])
 def reset_game():
     difficulty = request.json.get('difficulty', 'medium')
-    game.reset(ai_difficulty=difficulty)
+    time_limit = request.json.get('time_limit', 600)
+    game.reset(ai_difficulty=difficulty, time_limit=time_limit)
     return jsonify({"status": "ok"})
 
 @app.route('/set_difficulty', methods=['POST'])
 def set_difficulty():
     difficulty = request.json['difficulty']
-    game.reset(ai_difficulty=difficulty)
+    time_limit = request.json.get('time_limit', 600)
+    game.reset(ai_difficulty=difficulty, time_limit=time_limit)
     return jsonify({"status": "ok"})
+
+@app.route('/get_time', methods=['GET'])
+def get_time():
+    return jsonify({
+        "white_time": max(0, round(game.white_time)),
+        "black_time": max(0, round(game.black_time))
+    })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

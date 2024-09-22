@@ -10,6 +10,10 @@
     <div class="container">
         <h1>Chess Game</h1>
         <div id="game-status"></div>
+        <div id="timer-container">
+            <div id="white-timer">White: 10:00</div>
+            <div id="black-timer">Black: 10:00</div>
+        </div>
         <div id="chessboard"></div>
         <div class="controls">
             <button id="reset-btn">Reset Game</button>
@@ -18,6 +22,11 @@
                 <option value="easy">Easy</option>
                 <option value="medium" selected>Medium</option>
                 <option value="hard">Hard</option>
+            </select>
+            <select id="time-limit-select">
+                <option value="300">5 minutes</option>
+                <option value="600" selected>10 minutes</option>
+                <option value="900">15 minutes</option>
             </select>
         </div>
     </div>

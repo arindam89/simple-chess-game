@@ -3,9 +3,13 @@ const gameStatus = document.getElementById('game-status');
 const resetBtn = document.getElementById('reset-btn');
 const aiMoveBtn = document.getElementById('ai-move-btn');
 const difficultySelect = document.getElementById('difficulty-select');
+const timeLimitSelect = document.getElementById('time-limit-select');
+const whiteTimerDisplay = document.getElementById('white-timer');
+const blackTimerDisplay = document.getElementById('black-timer');
 
 let selectedSquare = null;
 let gameState = null;
+let timerInterval = null;
 
 const pieceUnicode = {
     'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
@@ -114,6 +118,7 @@ function updateGameState(state) {
     gameState = state;
     updateBoard(state.fen);
     updateStatus();
+    updateTimers(state.white_time, state.black_time);
 }
 
 function updateStatus() {
@@ -133,18 +138,31 @@ function updateStatus() {
         } else {
             status = 'Game over!';
         }
+        clearInterval(timerInterval);
     }
     gameStatus.textContent = status;
 }
 
+function updateTimers(whiteTime, blackTime) {
+    whiteTimerDisplay.textContent = `White: ${formatTime(whiteTime)}`;
+    blackTimerDisplay.textContent = `Black: ${formatTime(blackTime)}`;
+}
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
 async function resetGame() {
     const difficulty = difficultySelect.value;
+    const timeLimit = parseInt(timeLimitSelect.value);
     const response = await fetch('/reset', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ difficulty: difficulty }),
+        body: JSON.stringify({ difficulty: difficulty, time_limit: timeLimit }),
     });
     const result = await response.json();
     if (result.status === 'ok') {
@@ -157,17 +175,19 @@ async function resetGame() {
         });
         const initialState = await initialStateResponse.json();
         updateGameState(initialState);
+        startTimer();
     }
 }
 
 async function setDifficulty() {
     const difficulty = difficultySelect.value;
+    const timeLimit = parseInt(timeLimitSelect.value);
     const response = await fetch('/set_difficulty', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ difficulty: difficulty }),
+        body: JSON.stringify({ difficulty: difficulty, time_limit: timeLimit }),
     });
     const result = await response.json();
     if (result.status === 'ok') {
@@ -176,9 +196,21 @@ async function setDifficulty() {
     }
 }
 
+function startTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+    timerInterval = setInterval(async () => {
+        const response = await fetch('/get_time');
+        const result = await response.json();
+        updateTimers(result.white_time, result.black_time);
+    }, 1000);
+}
+
 createChessboard();
 resetGame();
 
 resetBtn.addEventListener('click', resetGame);
 aiMoveBtn.addEventListener('click', aiMove);
 difficultySelect.addEventListener('change', setDifficulty);
+timeLimitSelect.addEventListener('change', resetGame);
