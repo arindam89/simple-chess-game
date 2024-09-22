@@ -29,8 +29,8 @@ function createChessboard() {
     for (let row = 7; row >= 0; row--) {
         for (let col = 0; col < 8; col++) {
             const square = document.createElement('div');
-            square.classList.add('square');
-            square.classList.add((row + col) % 2 === 0 ? 'white' : 'black');
+            square.classList.add('w-1/8', 'h-1/8', 'flex', 'items-center', 'justify-center', 'text-4xl', 'cursor-pointer');
+            square.classList.add((row + col) % 2 === 0 ? 'bg-amber-200' : 'bg-amber-800');
             square.dataset.row = row;
             square.dataset.col = col;
             square.addEventListener('click', handleSquareClick);
@@ -45,7 +45,7 @@ function updateBoard(fen) {
         return;
     }
     const pieces = fen.split(' ')[0];
-    const squares = chessboard.getElementsByClassName('square');
+    const squares = chessboard.getElementsByClassName('w-1/8');
     let squareIndex = 0;
 
     // Clear all squares
@@ -74,12 +74,12 @@ function handleSquareClick(event) {
     if (selectedSquare === null) {
         if (clickedSquare.textContent !== '') {
             selectedSquare = clickedSquare;
-            selectedSquare.classList.add('selected');
+            selectedSquare.classList.add('bg-blue-400');
         }
     } else {
         const move = getMoveNotation(selectedSquare, clickedSquare);
         makeMove(move);
-        selectedSquare.classList.remove('selected');
+        selectedSquare.classList.remove('bg-blue-400');
         selectedSquare = null;
     }
 }
@@ -176,8 +176,9 @@ function displayMoveHistory() {
     for (let i = 0; i < moveHistory.length; i++) {
         const moveElement = document.createElement('div');
         moveElement.textContent = `${Math.floor(i/2) + 1}. ${moveHistory[i]}`;
+        moveElement.classList.add('py-1', 'px-2');
         if (i === currentMoveIndex) {
-            moveElement.classList.add('current-move');
+            moveElement.classList.add('bg-blue-200');
         }
         moveHistoryContainer.appendChild(moveElement);
     }
