@@ -21,9 +21,16 @@ def ai_move():
     result = game.ai_move()
     return jsonify(result)
 
-@app.route('/reset')
+@app.route('/reset', methods=['POST'])
 def reset_game():
-    game.reset()
+    difficulty = request.json.get('difficulty', 'medium')
+    game.reset(ai_difficulty=difficulty)
+    return jsonify({"status": "ok"})
+
+@app.route('/set_difficulty', methods=['POST'])
+def set_difficulty():
+    difficulty = request.json['difficulty']
+    game.reset(ai_difficulty=difficulty)
     return jsonify({"status": "ok"})
 
 if __name__ == "__main__":

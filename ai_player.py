@@ -5,6 +5,17 @@ class MinimaxAI:
     def __init__(self, depth):
         self.depth = depth
 
+    @classmethod
+    def create_ai(cls, difficulty):
+        if difficulty == "easy":
+            return cls(depth=1)
+        elif difficulty == "medium":
+            return cls(depth=3)
+        elif difficulty == "hard":
+            return cls(depth=5)
+        else:
+            raise ValueError("Invalid difficulty level")
+
     def get_best_move(self, board):
         best_move = None
         best_score = float('-inf')

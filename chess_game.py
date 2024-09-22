@@ -2,9 +2,9 @@ import chess
 from ai_player import MinimaxAI
 
 class ChessGame:
-    def __init__(self):
+    def __init__(self, ai_difficulty="medium"):
         self.board = chess.Board()
-        self.ai = MinimaxAI(depth=3)
+        self.ai = MinimaxAI.create_ai(ai_difficulty)
 
     def make_move(self, move):
         try:
@@ -24,8 +24,9 @@ class ChessGame:
             return self._get_game_state()
         return {"error": "Game is over"}
 
-    def reset(self):
+    def reset(self, ai_difficulty="medium"):
         self.board.reset()
+        self.ai = MinimaxAI.create_ai(ai_difficulty)
 
     def _get_game_state(self):
         return {

@@ -2,6 +2,7 @@ const chessboard = document.getElementById('chessboard');
 const gameStatus = document.getElementById('game-status');
 const resetBtn = document.getElementById('reset-btn');
 const aiMoveBtn = document.getElementById('ai-move-btn');
+const difficultySelect = document.getElementById('difficulty-select');
 
 let selectedSquare = null;
 let gameState = null;
@@ -64,8 +65,6 @@ function handleSquareClick(event) {
     } else {
         const move = getMoveNotation(selectedSquare, clickedSquare);
         makeMove(move);
-        // Clear the content of the origin square
-        selectedSquare.textContent = '';
         selectedSquare.classList.remove('selected');
         selectedSquare = null;
     }
@@ -139,7 +138,14 @@ function updateStatus() {
 }
 
 async function resetGame() {
-    const response = await fetch('/reset');
+    const difficulty = difficultySelect.value;
+    const response = await fetch('/reset', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ difficulty: difficulty }),
+    });
     const result = await response.json();
     if (result.status === 'ok') {
         const initialStateResponse = await fetch('/move', {
@@ -150,8 +156,23 @@ async function resetGame() {
             body: JSON.stringify({ move: 'initial' }),
         });
         const initialState = await initialStateResponse.json();
-        console.log('Initial state:', initialState);
         updateGameState(initialState);
+    }
+}
+
+async function setDifficulty() {
+    const difficulty = difficultySelect.value;
+    const response = await fetch('/set_difficulty', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ difficulty: difficulty }),
+    });
+    const result = await response.json();
+    if (result.status === 'ok') {
+        alert(`AI difficulty set to ${difficulty}`);
+        resetGame();
     }
 }
 
@@ -160,3 +181,4 @@ resetGame();
 
 resetBtn.addEventListener('click', resetGame);
 aiMoveBtn.addEventListener('click', aiMove);
+difficultySelect.addEventListener('change', setDifficulty);
