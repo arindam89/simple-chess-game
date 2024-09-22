@@ -6,18 +6,10 @@ const difficultySelect = document.getElementById('difficulty-select');
 const timeLimitSelect = document.getElementById('time-limit-select');
 const whiteTimerDisplay = document.getElementById('white-timer');
 const blackTimerDisplay = document.getElementById('black-timer');
-const moveHistoryContainer = document.getElementById('move-history');
-const prevMoveBtn = document.getElementById('prev-move-btn');
-const nextMoveBtn = document.getElementById('next-move-btn');
-const playPauseBtn = document.getElementById('play-pause-btn');
 
 let selectedSquare = null;
 let gameState = null;
 let timerInterval = null;
-let moveHistory = [];
-let currentMoveIndex = -1;
-let isReplaying = false;
-let replayInterval = null;
 
 const pieceUnicode = {
     'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
@@ -29,8 +21,8 @@ function createChessboard() {
     for (let row = 7; row >= 0; row--) {
         for (let col = 0; col < 8; col++) {
             const square = document.createElement('div');
-            square.classList.add('w-1/8', 'h-1/8', 'flex', 'items-center', 'justify-center', 'text-4xl', 'cursor-pointer');
-            square.classList.add((row + col) % 2 === 0 ? 'bg-amber-200' : 'bg-amber-800');
+            square.classList.add('square');
+            square.classList.add((row + col) % 2 === 0 ? 'white' : 'black');
             square.dataset.row = row;
             square.dataset.col = col;
             square.addEventListener('click', handleSquareClick);
@@ -45,7 +37,7 @@ function updateBoard(fen) {
         return;
     }
     const pieces = fen.split(' ')[0];
-    const squares = chessboard.getElementsByClassName('w-1/8');
+    const squares = chessboard.getElementsByClassName('square');
     let squareIndex = 0;
 
     // Clear all squares
@@ -67,19 +59,17 @@ function updateBoard(fen) {
 }
 
 function handleSquareClick(event) {
-    if (isReplaying) return;
-
     const clickedSquare = event.target;
     
     if (selectedSquare === null) {
         if (clickedSquare.textContent !== '') {
             selectedSquare = clickedSquare;
-            selectedSquare.classList.add('bg-blue-400');
+            selectedSquare.classList.add('selected');
         }
     } else {
         const move = getMoveNotation(selectedSquare, clickedSquare);
         makeMove(move);
-        selectedSquare.classList.remove('bg-blue-400');
+        selectedSquare.classList.remove('selected');
         selectedSquare = null;
     }
 }
@@ -129,7 +119,6 @@ function updateGameState(state) {
     updateBoard(state.fen);
     updateStatus();
     updateTimers(state.white_time, state.black_time);
-    updateMoveHistory(state.move_history);
 }
 
 function updateStatus() {
@@ -165,26 +154,6 @@ function formatTime(seconds) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-function updateMoveHistory(history) {
-    moveHistory = history;
-    currentMoveIndex = moveHistory.length - 1;
-    displayMoveHistory();
-}
-
-function displayMoveHistory() {
-    moveHistoryContainer.innerHTML = '';
-    for (let i = 0; i < moveHistory.length; i++) {
-        const moveElement = document.createElement('div');
-        moveElement.textContent = `${Math.floor(i/2) + 1}. ${moveHistory[i]}`;
-        moveElement.classList.add('py-1', 'px-2');
-        if (i === currentMoveIndex) {
-            moveElement.classList.add('bg-blue-200');
-        }
-        moveHistoryContainer.appendChild(moveElement);
-    }
-    moveHistoryContainer.scrollTop = moveHistoryContainer.scrollHeight;
-}
-
 async function resetGame() {
     const difficulty = difficultySelect.value;
     const timeLimit = parseInt(timeLimitSelect.value);
@@ -207,7 +176,6 @@ async function resetGame() {
         const initialState = await initialStateResponse.json();
         updateGameState(initialState);
         startTimer();
-        stopReplay();
     }
 }
 
@@ -249,67 +217,6 @@ async function updateTimersFromServer() {
     }
 }
 
-function prevMove() {
-    if (currentMoveIndex > 0) {
-        currentMoveIndex--;
-        updateBoardToMove(currentMoveIndex);
-    }
-}
-
-function nextMove() {
-    if (currentMoveIndex < moveHistory.length - 1) {
-        currentMoveIndex++;
-        updateBoardToMove(currentMoveIndex);
-    }
-}
-
-function updateBoardToMove(moveIndex) {
-    fetch('/move', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ move: 'initial' }),
-    })
-    .then(response => response.json())
-    .then(initialState => {
-        let board = new Chess(initialState.fen);
-        for (let i = 0; i <= moveIndex; i++) {
-            board.move(moveHistory[i]);
-        }
-        updateBoard(board.fen());
-        displayMoveHistory();
-    });
-}
-
-function toggleReplay() {
-    if (isReplaying) {
-        stopReplay();
-    } else {
-        startReplay();
-    }
-}
-
-function startReplay() {
-    isReplaying = true;
-    playPauseBtn.textContent = 'Pause';
-    replayInterval = setInterval(() => {
-        if (currentMoveIndex < moveHistory.length - 1) {
-            nextMove();
-        } else {
-            stopReplay();
-        }
-    }, 1000);
-}
-
-function stopReplay() {
-    isReplaying = false;
-    playPauseBtn.textContent = 'Play';
-    if (replayInterval) {
-        clearInterval(replayInterval);
-    }
-}
-
 createChessboard();
 resetGame();
 
@@ -317,6 +224,3 @@ resetBtn.addEventListener('click', resetGame);
 aiMoveBtn.addEventListener('click', aiMove);
 difficultySelect.addEventListener('change', setDifficulty);
 timeLimitSelect.addEventListener('change', resetGame);
-prevMoveBtn.addEventListener('click', prevMove);
-nextMoveBtn.addEventListener('click', nextMove);
-playPauseBtn.addEventListener('click', toggleReplay);

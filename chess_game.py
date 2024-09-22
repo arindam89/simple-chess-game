@@ -11,7 +11,6 @@ class ChessGame:
         self.black_time = time_limit
         self.last_move_time = None
         self.game_start_time = None
-        self.move_history = []
 
     def make_move(self, move):
         try:
@@ -19,7 +18,6 @@ class ChessGame:
             if chess_move in self.board.legal_moves:
                 self._update_time()
                 self.board.push(chess_move)
-                self.move_history.append(move)
                 self.last_move_time = time.time()
                 return self._get_game_state()
             else:
@@ -32,7 +30,6 @@ class ChessGame:
             self._update_time()
             ai_move = self.ai.get_best_move(self.board)
             self.board.push(ai_move)
-            self.move_history.append(ai_move.uci())
             self.last_move_time = time.time()
             return self._get_game_state()
         return {"error": "Game is over"}
@@ -45,7 +42,6 @@ class ChessGame:
         self.black_time = time_limit
         self.last_move_time = None
         self.game_start_time = time.time()
-        self.move_history = []
 
     def _update_time(self):
         current_time = time.time()
@@ -76,9 +72,5 @@ class ChessGame:
             "game_over": self.board.is_game_over(),
             "checkmate": self.board.is_checkmate(),
             "stalemate": self.board.is_stalemate(),
-            "move_history": self.move_history,
             **self.get_current_times()
         }
-
-    def get_move_history(self):
-        return self.move_history
