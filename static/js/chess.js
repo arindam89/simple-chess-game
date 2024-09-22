@@ -27,6 +27,10 @@ function createChessboard() {
 }
 
 function updateBoard(fen) {
+    if (!fen) {
+        console.error('FEN is undefined');
+        return;
+    }
     const pieces = fen.split(' ')[0];
     const squares = chessboard.getElementsByClassName('square');
     let squareIndex = 0;
@@ -103,12 +107,20 @@ async function aiMove() {
 }
 
 function updateGameState(state) {
+    if (!state || !state.fen) {
+        console.error('Invalid game state');
+        return;
+    }
     gameState = state;
     updateBoard(state.fen);
     updateStatus();
 }
 
 function updateStatus() {
+    if (!gameState) {
+        console.error('Game state is not initialized');
+        return;
+    }
     let status = `Current turn: ${gameState.turn}`;
     if (gameState.in_check) {
         status += ' | Check!';
