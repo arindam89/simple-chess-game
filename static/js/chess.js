@@ -90,6 +90,7 @@ async function makeMove(move) {
     });
     const result = await response.json();
     if (result.error) {
+        console.error('Move error:', result.error);
         alert(result.error);
     } else {
         updateGameState(result);
@@ -108,7 +109,7 @@ async function aiMove() {
 
 function updateGameState(state) {
     if (!state || !state.fen) {
-        console.error('Invalid game state');
+        console.error('Invalid game state:', state);
         return;
     }
     gameState = state;
@@ -146,9 +147,10 @@ async function resetGame() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ move: 'e2e2' }), // Invalid move to get initial state
+            body: JSON.stringify({ move: 'initial' }),
         });
         const initialState = await initialStateResponse.json();
+        console.log('Initial state:', initialState);
         updateGameState(initialState);
     }
 }

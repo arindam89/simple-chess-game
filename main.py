@@ -11,6 +11,8 @@ def index():
 @app.route('/move', methods=['POST'])
 def make_move():
     move = request.json['move']
+    if move == 'initial':
+        return jsonify(game._get_game_state())
     result = game.make_move(move)
     return jsonify(result)
 
