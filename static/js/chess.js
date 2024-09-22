@@ -272,7 +272,7 @@ function updateBoardToMove(moveIndex) {
     })
     .then(response => response.json())
     .then(initialState => {
-        let board = chess.Chess(initialState.fen);
+        let board = new Chess(initialState.fen);
         for (let i = 0; i <= moveIndex; i++) {
             board.move(moveHistory[i]);
         }
