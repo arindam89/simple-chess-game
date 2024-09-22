@@ -14,7 +14,18 @@
             <div id="white-timer">White: 10:00</div>
             <div id="black-timer">Black: 10:00</div>
         </div>
-        <div id="chessboard"></div>
+        <div class="game-container">
+            <div id="chessboard"></div>
+            <div id="move-history-container">
+                <h3>Move History</h3>
+                <div id="move-history"></div>
+                <div id="replay-controls">
+                    <button id="prev-move-btn">Previous</button>
+                    <button id="next-move-btn">Next</button>
+                    <button id="play-pause-btn">Play/Pause</button>
+                </div>
+            </div>
+        </div>
         <div class="controls">
             <button id="reset-btn">Reset Game</button>
             <button id="ai-move-btn">AI Move</button>

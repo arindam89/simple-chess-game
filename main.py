@@ -39,5 +39,9 @@ def set_difficulty():
 def get_time():
     return jsonify(game.get_current_times())
 
+@app.route('/get_move_history', methods=['GET'])
+def get_move_history():
+    return jsonify({"move_history": game.get_move_history()})
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
