@@ -31,6 +31,11 @@ function updateBoard(fen) {
     const squares = chessboard.getElementsByClassName('square');
     let squareIndex = 0;
 
+    // Clear all squares
+    for (let square of squares) {
+        square.textContent = '';
+    }
+
     for (let i = 0; i < pieces.length; i++) {
         const char = pieces[i];
         if (char === '/') {
@@ -55,6 +60,8 @@ function handleSquareClick(event) {
     } else {
         const move = getMoveNotation(selectedSquare, clickedSquare);
         makeMove(move);
+        // Clear the content of the origin square
+        selectedSquare.textContent = '';
         selectedSquare.classList.remove('selected');
         selectedSquare = null;
     }
