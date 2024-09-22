@@ -37,10 +37,7 @@ def set_difficulty():
 
 @app.route('/get_time', methods=['GET'])
 def get_time():
-    return jsonify({
-        "white_time": max(0, round(game.white_time)),
-        "black_time": max(0, round(game.black_time))
-    })
+    return jsonify(game.get_current_times())
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

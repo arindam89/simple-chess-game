@@ -10,6 +10,7 @@ class ChessGame:
         self.white_time = time_limit
         self.black_time = time_limit
         self.last_move_time = None
+        self.game_start_time = None
 
     def make_move(self, move):
         try:
@@ -40,17 +41,28 @@ class ChessGame:
         self.white_time = time_limit
         self.black_time = time_limit
         self.last_move_time = None
+        self.game_start_time = time.time()
 
     def _update_time(self):
+        current_time = time.time()
         if self.last_move_time is not None:
-            elapsed_time = time.time() - self.last_move_time
+            elapsed_time = current_time - self.last_move_time
             if self.board.turn == chess.WHITE:
                 self.black_time -= elapsed_time
             else:
                 self.white_time -= elapsed_time
 
-            if self.white_time <= 0 or self.black_time <= 0:
-                self.board.set_result("0-1" if self.white_time <= 0 else "1-0")
+        if self.white_time <= 0 or self.black_time <= 0:
+            self.board.set_result("0-1" if self.white_time <= 0 else "1-0")
+
+        self.last_move_time = current_time
+
+    def get_current_times(self):
+        self._update_time()
+        return {
+            "white_time": max(0, round(self.white_time)),
+            "black_time": max(0, round(self.black_time))
+        }
 
     def _get_game_state(self):
         return {
@@ -60,6 +72,5 @@ class ChessGame:
             "game_over": self.board.is_game_over(),
             "checkmate": self.board.is_checkmate(),
             "stalemate": self.board.is_stalemate(),
-            "white_time": max(0, round(self.white_time)),
-            "black_time": max(0, round(self.black_time)),
+            **self.get_current_times()
         }

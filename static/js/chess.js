@@ -138,7 +138,7 @@ function updateStatus() {
         } else {
             status = 'Game over!';
         }
-        clearInterval(timerInterval);
+        stopTimer();
     }
     gameStatus.textContent = status;
 }
@@ -197,14 +197,24 @@ async function setDifficulty() {
 }
 
 function startTimer() {
+    stopTimer();
+    timerInterval = setInterval(updateTimersFromServer, 1000);
+}
+
+function stopTimer() {
     if (timerInterval) {
         clearInterval(timerInterval);
     }
-    timerInterval = setInterval(async () => {
+}
+
+async function updateTimersFromServer() {
+    try {
         const response = await fetch('/get_time');
         const result = await response.json();
         updateTimers(result.white_time, result.black_time);
-    }, 1000);
+    } catch (error) {
+        console.error('Error updating timers:', error);
+    }
 }
 
 createChessboard();
